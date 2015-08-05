@@ -70,17 +70,6 @@
 			}
 		},
 
-		getDpi : function(){
-		//Calculate the dpi of the screen
-		var testDiv = document.createElement("div");
-		document.body.appendChild(testDiv);
-		testDiv.style.height = "1in";
-		testDiv.style.width = "1in";
-		var dpiString = document.defaultView.getComputedStyle(testDiv,null).height; 
-		dpiString = dpiString.substring(0, (dpiString.length - 2));
-		this.dpi = parseInt(dpiString, 10);
-		document.body.removeChild(testDiv);
-	},
 	getFirstMultiColumnElement : function(){
 		var elements;
 		var element;
@@ -107,6 +96,7 @@
 		}	
 		return element;
 	},
+
 	getElementHeight: function(node){
 		//returns the height of an element, including top and bottom margin. Unit is pixel.
 		var elementHeight = 0;
@@ -127,21 +117,24 @@
 			elementHeight += marginBottom;
 		}	
 		return elementHeight;	
-	},	
+	},
+
 	getElementTop: function(node){
 		//returns the distance between the top margin of the element and the top margin of the parent element. Unit is pixel.
 		var topString = document.defaultView.getComputedStyle(node, null).top;
 		topString = topString.substring(0, (topString.length - 2));
 		var elementTop = parseInt(topString, 10);
 		return elementTop;						
-	},	
+	},
+
 	getElementBottom: function(node){
 		//returns the distance between the top margin of the element and the top margin of the parent element. Unit is pixel.
 		var bottomString = document.defaultView.getComputedStyle(node, null).bottom;
 		bottomString = bottomString.substring(0, (bottomString.length - 2));
 		var elementBottom = parseInt(bottomString, 10);
 		return elementBottom;						
-	},	
+	},
+
 	getCopyrightBoxHeight: function(columnWidthPX){			
 		//returns the height of the copyright box.
 		var node = document.getElementById("copyrightBox");
@@ -152,6 +145,7 @@
 		var height = parseInt(heightString, 10);
 		return height;	
 	},	
+
 	initialize : function(){
 		this.getDpi();
 		this.getTitle();
@@ -264,6 +258,7 @@
 		this.lineHeight = this.getElementHeight(testLine); 
 		document.body.removeChild(testLine);
 	},
+
 	calculateRemainingSpace : function (mode) {
 		//Returns the remaining space in the column
 		var remainingSpace = 0;
@@ -289,7 +284,8 @@
 			remainingSpace = this.lastPageColumnHeight - this.getElementHeight(this.container[this.currentContainer]);
 		}	
 		return remainingSpace;
-	},	
+	},
+
 	createColumn : function () {
 		//Creates a new column
 		var newColumn = document.createElement("div");
@@ -301,6 +297,7 @@
 		this.container[this.container.length - 1].style.width = this.columnWidthPX +"px";
 		document.body.appendChild(this.container[this.container.length - 1]);
 	},
+
 	getColumnHeight : function (){
 		var columnHeight;
 		switch (this.currentContainer){
@@ -312,6 +309,7 @@
 		}
 		return columnHeight;
 	},
+
 	alignColumns : function () {		
 		if (this.type !== "lncs") {
 			for (var i = 0; i < this.container.length; i++) {
@@ -342,6 +340,7 @@
 			}
 		}			
 	},
+
 	createPageBreaks : function(){
 		var element = document.body.firstElementChild;
 		while(element){		
@@ -377,6 +376,7 @@
 		document.body.removeChild(document.body.lastElementChild);
 		document.body.lastElementChild.style.pageBreakAfter = "auto";	
 	},
+
 	nextColumn : function (mode){
 		if(mode === "normal"){
 			if (!this.container[this.currentContainer + 1]) {
@@ -390,6 +390,7 @@
 			}
 		}
 	},
+
 	replaceCite : function (node){
 		//replace all cite entries		
 		var nodeChild;
@@ -492,6 +493,7 @@
 			}
 		}
 	},
+
 	createHeadlineCounter : function(){
 		//Create headline counter
 		if (this.type === "lncs" || this.type === "infovis") {
@@ -520,6 +522,7 @@
 			}
 		}		
 	},
+
 	createListCounter: function(){
 		//Create Ordered List counter
 		var element = document.body.firstElementChild;
@@ -586,6 +589,7 @@
 			element = element.nextElementSibling;
 		}		
 	},
+
 	alignImages: function(){
 		//Align Images
 		if(!(this.type === "lncs" || this.type === "chiextended")){
@@ -604,6 +608,7 @@
 			}			
 		}		
 	},
+
 	alignFootnotes : function(){
 		//Align Footnotes
 		var element = document.body.firstElementChild;
@@ -636,7 +641,8 @@
 				element = element.nextElementSibling;				
 			}
 		}		
-	},			
+	},
+
 	alignFullPageImg : function(img){
 		//Align ChiExtended Full Page Image
 		document.body.appendChild(img);
@@ -661,6 +667,7 @@
 		var temp = document.getElementById("fullPageImg");		
 		document.body.insertBefore(temp, element);							
 	},
+
 	fillColumns : function (element, mode) {
 		var tempElement;
 		var remainingSpace;
@@ -693,13 +700,15 @@
 					var testNode;
 					var contentElement = element.firstChild;
 					while (contentElement) {
-						//Element is not a text node
+						// Element is not a text node
 						if (contentElement.nodeName !== "#text") {
-							//Enough space						
+							
+							// Enough space						
 							if (remainingSpace >= (this.getElementHeight(tempElement) + this.getElementHeight(contentElement))) {
 								tempElement.appendChild(contentElement.cloneNode(true));
 							}
-							//not enough space
+
+							// Not enough space
 							else {
 								this.nextColumn(mode);
 								remainingSpace = this.calculateRemainingSpace(mode);
@@ -708,21 +717,25 @@
 								tempElement.appendChild(contentElement.cloneNode(true));
 							}
 						}
-						//Element is a text node
+
+						// Element is a text node
 						else {						
 							var content = contentElement.wholeText.split(" ");
 							for (var j = 0; j < content.length; j++) {
 								remainingSpace = this.calculateRemainingSpace(mode);
-								//Enough space
+								
+								// Enough space
 								if (remainingSpace >= this.getElementHeight(tempElement)) {
 									newTextNode = document.createTextNode(content[j] + " ");
 									tempElement.appendChild(newTextNode);
 								}
-								//not enough space
+								
+								// Not enough space
 								else {																			
 									var tempCounter = 1;
 									tempElement.removeChild(newTextNode);
-									//Take care of widows: 
+									
+									// Take care of widows
 									this.container[this.currentContainer].appendChild(testElement);
 									var x = j - 1;
 									if(x < 0){x++;}
@@ -743,7 +756,8 @@
 											tempElement.removeChild(tempElement.lastChild);
 											tempCounter++;
 										}
-										//delete empty element
+										
+										// Delete empty element
 										if (tempElement.hasChildNodes() === false) {
 											this.container[this.currentContainer].removeChild(tempElement);
 										}
@@ -761,7 +775,8 @@
 										tempElement.appendChild(newTextNode);
 										tempCounter--;
 									}
-									//if the previous headline is now an orphan, get it:
+									
+									// If the previous headline is now an orphan, get it:
 									if (this.container[this.currentContainer - 1].lastElementChild.nodeName === "h2" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h3" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h4" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h5" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h6") {
 										this.container[this.currentContainer].insertBefore(this.container[this.currentContainer - 1].lastElementChild, tempElement);
 									}
@@ -773,27 +788,31 @@
 					element = element.nextElementSibling;
 				}				
 			}
-			//List elements	
+			
+			// List elements	
 			else if ((element.nodeName === "ol" || element.nodeName === "ul")){
-				//Column is full
+				// Column is full
 				if (remainingSpace <= 0 ) {			
 					this.nextColumn(mode);
 					tempElement = element.cloneNode(true);
 					this.container[this.currentContainer].appendChild(tempElement);
 					element = element.nextElementSibling;
 				}				
-				//Not enough space
+				
+				// Not enough space
 				else if(remainingSpace < this.getElementHeight(element)){
 					tempElement = document.createElement(element.nodeName);
 					this.container[this.currentContainer].appendChild(tempElement);				
 					contentElement = element.firstElementChild;
 					while(contentElement){	
 						remainingSpace = this.calculateRemainingSpace(mode);
-						//Enough space:
+						
+						// Enough space:
 						if (remainingSpace >= this.getElementHeight(contentElement) || (mode === "lastColumns" && this.currentContainer === this.container.length-1)) {							
 							tempElement.appendChild(contentElement.cloneNode(true));				
 						}
-						//Not enough space:
+
+						// Not enough space:
 						else {
 							if (tempElement.hasChildNodes() === false) {
 								this.container[this.currentContainer].removeChild(tempElement);
@@ -806,35 +825,40 @@
 						}
 						contentElement = contentElement.nextElementSibling;
 					}
-					//if the previous headline is now an orphan, get it:
+					
+					// If the previous headline is now an orphan, get it:
 					if(this.container[this.currentContainer - 1].hasChildNodes()){
 						if (this.container[this.currentContainer - 1] && this.container[this.currentContainer - 1].lastElementChild.nodeName === "h2" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h3" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h4" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h5" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h6") {
 							this.container[this.currentContainer].insertBefore(this.container[this.currentContainer - 1].lastElementChild, tempElement);
 						}
 					}
 				}
-				//enough space:
+				// Enough space:
 				else{
 					tempElement = element.cloneNode(true);
 					this.container[this.currentContainer].appendChild(tempElement);					
 				}
 				element = element.nextElementSibling;				
-			}					
-			//if headline would become an orphan:
+			}
+
+			// If headline would become an orphan:
 			else if ((element.nodeName === "h2" || element.nodeName === "h3" || element.nodeName === "h4" || element.nodeName === "h5" || element.nodeName === "h6") && (this.getElementHeight(element) + this.lineHeight) > remainingSpace) {
 				this.nextColumn(mode);
 				tempElement = element.cloneNode(true);
 				this.container[this.currentContainer].appendChild(tempElement);
 				element = element.nextElementSibling;
 			}
-			//Pictures, Math:
+
+			// Pictures, Math:
 			else if( (element.nodeName === "img" || element.nodeName === "math")){
 				var tempCaption;
-				//If the Column is full:				
+				
+				// If the Column is full:				
 				if (this.getElementHeight(element) > remainingSpace) {
 					this.nextColumn(mode);		
 				}
-				//don't move the element:
+
+				// Don't move the element:
 				if(this.type === "lncs" || this.type === "chiextended"){
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);	
@@ -845,7 +869,8 @@
 					element = element.nextElementSibling;
 					element = element.nextElementSibling;
 				}
-				//if the first element of the column is not a Picture, Math Element
+				
+				// If the first element of the column is not a Picture, Math Element
 				else if(this.container[this.currentContainer].childElementCount === 0 || !(this.container[this.currentContainer].firstElementChild.nodeName === "img" || this.container[this.currentContainer].firstElementChild.nodeName === "table" || this.container[this.currentContainer].firstElementChild.nodeName === "math")){
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);	
@@ -855,8 +880,9 @@
 					
 					element = element.nextElementSibling;
 					element = element.nextElementSibling;
-				}	
-				//if the last element of the column is not a Picture, Table, Math Element
+				}
+
+				// If the last element of the column is not a Picture, Table, Math Element
 				else if(this.container[this.currentContainer].childElementCount === 0 || !(this.container[this.currentContainer].lastElementChild.nodeName === "img" || this.container[this.currentContainer].lastElementChild.nodeName === "table" || this.container[this.currentContainer].lastElementChild.nodeName === "math")){
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);
@@ -884,19 +910,22 @@
 					element = element.nextElementSibling;
 					element = element.nextElementSibling;
 					this.currentContainer -= tempCounter;
-				}				
-				//Return to the previous column if there is enough space
+				}	
+
+				// Return to the previous column if there is enough space
 				if(mode === "normal" && this.calculateRemainingSpace(this.currentContainer-1) >= (this.getElementHeight(element) + this.lineHeight) && !(this.type === "lncs" || this.type === "chiextended")){
 					this.currentContainer--;
 				}	
 			}
-			//Tables:
+
+			// Tables:
 			else if (element.nodeName === "table") {
-				//If the Column is full:				
+				// If the Column is full:				
 				if (this.getElementHeight(element) > remainingSpace) {
 					this.nextColumn(mode);
 				}
-				//don't move the element:
+
+				// Don't move the element:
 				if (this.type === "lncs" || this.type === "chiextended") {
 					tempElement = element.cloneNode(true);
 					if (this.type === "lncs") {
@@ -907,7 +936,8 @@
 					}
 					element = element.nextElementSibling;
 				}
-				//if the first element of the column is not a Picture, Table, Math Element
+				
+				// If the first element of the column is not a Picture, Table, Math Element
 				else 
 					if (this.container[this.currentContainer].childElementCount === 0 || !(this.container[this.currentContainer].firstElementChild.nodeName === "img" || this.container[this.currentContainer].firstElementChild.nodeName === "table" || this.container[this.currentContainer].firstElementChild.nodeName === "math")) {
 						tempElement = element.cloneNode(true);
@@ -919,7 +949,8 @@
 						}
 						element = element.nextElementSibling;
 					}
-					//if the last element of the column is not a Picture, Table, Math Element
+					
+					// If the last element of the column is not a Picture, Table, Math Element
 					else 
 						if (this.container[this.currentContainer].childElementCount === 0 || !(this.container[this.currentContainer].lastElementChild.nodeName === "img" || this.container[this.currentContainer].lastElementChild.nodeName === "table" || this.container[this.currentContainer].lastElementChild.nodeName === "math")) {
 							tempElement = element.cloneNode(true);
@@ -950,19 +981,23 @@
 							element = element.nextElementSibling;
 							this.currentContainer -= tempCounter;
 						} 
-				//Return to the previous column if there is enough space
+				
+				// Return to the previous column if there is enough space
 				if (mode === "normal" && this.calculateRemainingSpace(this.currentContainer - 1) >= (this.getElementHeight(element) + this.lineHeight) && !(this.type === "lncs" || this.type === "chiextended")) {
 					this.currentContainer--;
 				}
-			}			
-			//Footnotes:
+			}
+
+			// Footnotes:
 			else 
 				if (element.className === "footnote") {
-					//If the Column is full:				
+					
+					// If the Column is full:				
 					if (this.getElementHeight(element) > remainingSpace) {
 						this.nextColumn(mode);
 					}
-					//if the last element of the column is not a Footnote
+					
+					// If the last element of the column is not a Footnote
 					if (this.container[this.currentContainer].childElementCount === 0 || this.container[this.currentContainer].lastElementChild.className !== "footnote") {
 						var tempHr = document.createElement("hr");
 						if (this.type === "infovis") {
@@ -974,7 +1009,8 @@
 					this.container[this.currentContainer].appendChild(tempElement);
 					element = element.nextElementSibling;
 				}
-				//Copyright Box:
+
+				// Copyright Box:
 				else 
 					if (element.className === "copyrightBox") {
 						if (this.medium === "print") {
@@ -1000,6 +1036,7 @@
 						}
 					}			
 				},
+
 				parseBibtex :function(){
 					this.documentCitationList = [];
 					var bibtex = new BibTex();
@@ -1781,6 +1818,7 @@
 					document.getElementById("bibTex").parentNode.insertBefore(tempElement, document.getElementById("references").nextSibling);
 					document.getElementById("bibTex").parentNode.removeChild(document.getElementById("bibTex"));
 				},
+
 				createPaper : function (medium) {		
 					var fullPageImg;
 					this.medium = medium;
@@ -1792,7 +1830,8 @@
 						fullPageImg = document.getElementById("fullPageImg");
 						document.body.removeChild(document.getElementById("fullPageImg"));
 					}
-		//replace cite entries:
+
+		// Replace cite entries:
 		var element = document.body.firstElementChild;
 		while(element){		
 			this.replaceCite(element);	
@@ -1801,9 +1840,11 @@
 		if (this.medium === "print") {		
 			element = this.getFirstMultiColumnElement();	
 			var mode = "normal";	
-			//Fill Columns		
+			
+			// Fill Columns		
 			this.fillColumns(element, mode);
-			//delete old content
+			
+			// Delete old content
 			element = this.getFirstMultiColumnElement();
 			while (element) {
 				if (element.className === "column") {
@@ -1812,7 +1853,8 @@
 				element = element.nextElementSibling;
 				document.body.removeChild(element.previousElementSibling);
 			}
-			//SigChi Columns of the last page should be of approximately equal length:
+
+			// SigChi Columns of the last page should be of approximately equal length:
 			if (this.type === "sigchi" || this.type === "chiextended") {
 				if (this.container.length % 2 !== 0) {
 					this.createColumn();
@@ -1832,7 +1874,8 @@
 					tempContent.appendChild(element.cloneNode(true));
 					element = element.nextElementSibling;
 				}
-				//remove everything from the last two columns:
+
+				// Remove everything from the last two columns:
 				var y = 0;
 				while (y < this.container[this.container.length - 2].childElementCount) {
 					element = this.container[this.container.length - 2].firstElementChild;
@@ -1842,12 +1885,14 @@
 					element = this.container[this.container.length - 1].firstElementChild;
 					this.container[this.container.length - 1].removeChild(element);
 				}
-				//refill the last two columns:
+
+				// Refill the last two columns:
 				element = tempContent.firstElementChild;
 				this.currentContainer = this.container.length - 2;
 				mode = "lastColumns";			
 				this.fillColumns(element, mode);
-				//if there is only one element in the last two columns, it should be on the left side:
+				
+				// If there is only one element in the last two columns, it should be on the left side:
 				if (!this.getElementHeight(this.container[this.container.length - 2]) > 0) {
 					this.container[this.container.length - 2].appendChild(this.container[this.container.length - 1].firstElementChild);
 				}
