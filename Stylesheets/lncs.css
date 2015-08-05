@@ -1,0 +1,59 @@
+@media print, screen{
+	body 							{width: 12.2cm; margin: auto; text-align: center; font-family: "Times New Roman"; font-size: 10pt;}
+	h1, h2, h3, h6 					{font-weight: bold;}
+	h2, h3, h6						{text-align: left;}
+	h1								{font-size: 14pt; margin-top: 0; margin-bottom: 26pt; text-align: center; }
+	h2								{font-size: 12pt; margin-top:12pt; margin-bottom:12pt;}
+	h3								{font-size: 10pt; margin-top:10pt; margin-bottom:10pt;}
+	h4								{display: run-in;}
+	h5								{display: run-in; font-style: italic; font-weight: normal;}
+	h6								{font-size: 12pt; margin-top:12pt; margin-bottom:12pt;}
+	h2:first-child, h3:first-child, h6:first-child {margin-top:0;}
+	p								{margin-top:0; margin-bottom: 0; text-indent: 1em; text-align: justify;}
+	p:first-child					{text-indent:0;}
+	ol								{margin-top:0; padding-top:0; padding-left: 0; text-align: justify; list-style-type: none;}
+	ul								{margin-top:10pt; padding-top:0; padding-left: 0; list-style-image: url(../Pictures/square.png); text-align: justify;}
+	li								{margin-left: 0.425cm;}
+	ul > li							{margin-left: 0.6cm; margin-bottom:10pt;}
+	hr								{width: 2cm; border-style: solid; border-width: 0.02cm; text-align: left;}
+	.author							{text-align: center; font-size: 10pt; margin-left: 1cm; margin-right: 1cm; margin-bottom: 10pt; text-indent:0;}
+	h1 + p + p						{text-align: center; font-size: 9pt; margin-left: 1cm; margin-right: 1cm;  text-indent:0;}
+	h1 + p + p + p					{text-align: center; font-family: Courier; font-size: 9pt; margin-left: 1cm; margin-right: 1cm; margin-bottom: 36pt; text-indent:0;}
+	p.abstract						{text-align: justify; font-size: 9pt; margin-left: 1cm; margin-right: 1cm; margin-top: 10pt; margin-bottom: 10pt; text-indent:0;}
+	p.keywords						{text-align: justify; font-size: 9pt; margin-left: 1cm; margin-right: 1cm; margin-bottom: 22pt; text-indent:0;}
+	h2.abstract						{text-align: justify; font-size: 9pt; text-indent:0; display: run-in;}
+	h2.keywords						{text-align: justify; font-size: 9pt; text-indent:0; display: run-in;}
+	h2 + p, h3 + p					{text-indent:0;}
+	div								{page-break-inside:avoid; margin:0; padding: 0;}
+	img								{margin-top: 6mm; margin-bottom: 8mm;}
+	math							{text-align : center;  font-size: 14pt;}
+	code							{display:block; text-align : left; margin-top: 6mm; margin-bottom: 8mm;}
+	table							{border-collapse :collapse; text-align: justify;}
+	th								{font-weight: bold; text-align: center; border-width : 2px; border-style: solid; padding: 4px;}
+	td								{text-align: center; border-width : 2px; border-style: solid; padding: 4px;}
+	h2:before						{font-variant: normal; font-size: 12pt; font-weight: bold; text-align: left;}
+	h3:before						{font-size: 10pt; font-weight: bold; text-align: left;}
+	cite							{font-style: normal;}
+	.figCaption						{font-size: 9pt; text-align: justify; margin-bottom: 10pt;}
+	.figCaption:before				{font-size: 9pt; font-weight: bold; text-align: left; content: "Fig. " counter(figCounter) ". "; counter-increment: figCounter;}
+	.tabCaption						{font-size: 9pt; font-weight: bold; text-align: justify;}
+	.tabCaption:before				{font-size: 9pt; font-weight: bold; text-align: center; content: "Table " counter(tabCounter) ". "; counter-increment: tabCounter;}
+	.mathCaption					{font-family: "Helvetica", "Arial"; font-size: 12pt; text-align: right; float : right; }
+	.mathCaption:before				{font-family: "Helvetica", "Arial"; font-size: 12pt; text-align: right; content: "(" counter(mathCounter) ")"; counter-increment: mathCounter; }		
+	.footnote						{text-align: justify;}
+	.footnote:before				{vertical-align: super; font-size: 6pt; content: counter(footCounter) "  "; counter-increment: footCounter;}
+	.heading						{text-indent:0;margin-top:10pt;}
+}
+@media print{
+	a						{color:black; text-decoration: none;}
+	}
+@media screen{
+	img						{display:block; margin:auto;}
+	table					{margin:auto;}
+	code					{margin:auto;}
+	math					{margin:auto;}
+	.figCaption				{margin:auto; text-align : center;}
+	.tabCaption				{margin:auto; text-align : center;}
+	.mathCaption			{margin:auto; text-align : center;}
+	}
+@page						{margin-top: 4.4cm; margin-bottom: 6.4cm; padding: 0;}

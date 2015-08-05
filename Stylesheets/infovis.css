@@ -1,0 +1,53 @@
+@media print, screen{
+	body 							{width: 18.1102cm; margin:auto; text-align: center; font-family: "Times New Roman"; font-size: 8pt;}
+	h1, h2, h3, h4, h5				{margin-top:0; font-family: "Helvetica", "Arial";}
+	h2, h3, h4, h5					{text-align: left; font-size: 9pt; margin-top:9pt; margin-bottom:3pt;}
+	h2:first-child, h3:first-child, h4:first-child, h5:first-child {margin-top:0;}
+	h2, h3, h5						{font-weight: bold;}
+	h1								{font-weight: normal; text-align: center; font-size: 18pt;}
+	h2, h5							{font-variant: small-caps;}
+	p								{margin-top:0; margin-bottom: 0; text-indent: 1em; text-align: justify;}
+	p:first-child					{text-indent: 0; margin-top:14pt;}
+	ol								{margin-top:0; padding-top:0; padding-left: 0; text-align: justify; list-style-type: none;}
+	ul								{margin-top:0; padding-top:0; padding-left: 0; text-align: justify;}
+	li								{margin-left: 0.425cm;}
+	hr								{width: 4cm; border-style: solid; border-width: 0.02cm; text-align: center;}
+	.author							{font-family: "Helvetica", "Arial"; text-align: center; font-size: 10pt; text-indent:0; margin-bottom:16pt;}
+	p.abstract						{font-family: "Helvetica", "Arial"; text-align: justify; font-size: 8pt; margin-left: 0.8382cm; margin-right: 0.8382cm; margin-bottom: 6pt; text-indent:0;}
+	p.keywords						{font-family: "Helvetica", "Arial"; text-align: justify; font-size: 8pt; margin-left: 0.8382cm; margin-right: 0.8382cm; text-indent:0;}
+	h2.abstract						{font-variant: normal; font-family: "Helvetica", "Arial"; text-align: justify; font-size: 8pt; text-indent:0; display: run-in;}
+	h2.keywords						{font-variant: normal; font-family: "Helvetica", "Arial"; text-align: justify; font-size: 8pt; text-indent:0; display: run-in;}
+	h2 + p, h3 + p, h4 + p, h5 + p	{text-indent:0;}
+	div								{page-break-inside:avoid; margin:0; padding: 0;}
+	code							{display:block; text-align : left;}
+	table							{border-collapse :collapse; margin: 0.2cm 1cm  1cm  1cm;}
+	img								{margin-top: 6pt;}
+	math							{text-align : center;}
+	th								{font-weight: normal; text-align: center; border-width : 0 0 2px 0 ; border-style: solid; }
+	td								{text-align: center; border-style: none;}
+	cite							{font-style: normal;}	
+	.figCaption						{font-family: "Helvetica", "Arial"; font-size: 8pt; text-align: left;}
+	.figCaption:before				{font-family: "Helvetica", "Arial"; font-size: 8pt; text-align: left; content: "Fig. " counter(figCounter) ". "; counter-increment: figCounter;}
+	.teaserImg + .figCaption		{margin-left: 0.8382cm; margin-bottom: 6pt; margin-top: 6pt;}
+	.tabCaption						{font-family: "Helvetica", "Arial"; font-size: 8pt; text-align: center;}
+	.tabCaption:before				{font-family: "Helvetica", "Arial"; font-size: 8pt; text-align: center; content: "Table " counter(tabCounter) ". "; counter-increment: tabCounter;}
+	.mathCaption					{font-family: "Helvetica", "Arial"; font-size: 8pt; text-align: right; float : right;}
+	.mathCaption:before				{font-family: "Helvetica", "Arial"; font-size: 8pt; text-align: right; content: "(" counter(mathCounter) ")"; counter-increment: mathCounter;}	
+	.footnote						{font-size: 7.5pt; text-align: justify;}
+	.footnote:before				{vertical-align: super; font-size: 6pt; content: counter(footCounter) "  "; counter-increment: footCounter;}
+	.copyrightBox					{text-align: left; font-family: "Times New Roman"; font-size: 7.5pt; font-style: italic;}/*margin-bottom: 16pt; */
+	.diamondRule					{text-align: center; margin-top: 6pt; margin-bottom:6pt;}
+}
+@media print{
+	a						{color:black; text-decoration: none;}
+	}
+@media screen{
+	img						{margin-left:auto; margin-right:auto; }
+	table					{margin:auto;}
+	code					{margin:auto;}
+	math					{margin:auto; display:block}
+	.figCaption				{text-align: center;}
+	.tabCaption				{margin:auto; text-align : center;}
+	.mathCaption			{margin:auto; text-align : center;}
+	}
+@page								{margin-top: 1.905cm; margin-bottom: 1.5875cm; margin-left:1.905cm; margin-right:1.5875cm; padding: 0;}

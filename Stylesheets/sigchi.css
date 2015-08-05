@@ -1,0 +1,46 @@
+@media print, screen{
+	body 					{width: 17.78cm; margin:auto; text-align: justify; font-family: "Times New Roman"; font-size: 10pt;}
+	h1, h2, h3, h4			{font-family: "Helvetica", "Arial";}
+	h1, h2, h3				{font-weight: bold;}
+	h2, h3, h4				{margin-top:9pt; margin-bottom:0; text-align: left; font-size: 9pt;}
+	h1						{margin-bottom: 9pt; margin-top: 18pt; text-align: center; font-size: 18pt; }
+	h2						{text-transform: uppercase;}
+	h4						{font-style: italic;}
+	h2:first-child, h3:first-child, h4:first-child {margin-top:0;}
+	p						{margin-top:0; margin-bottom:0; }
+	div p + p				{margin-top: 10pt;}
+	div						{page-break-inside:avoid; margin:0; padding: 0;}
+	ol						{margin-top:0; padding-top:0; padding-left: 0; list-style-type: none;}
+	ul						{margin-top:0; padding-top:0; padding-left: 0;}
+	li						{margin-left: 0.425cm; margin-bottom: 8pt;}
+	hr						{width: 5cm; border-style: solid; border-width: 0.02cm; text-align: left;}
+	h1 + .author			{text-align: center; font-family: "Times New Roman"; font-size: 12pt; float: left; margin-bottom:12pt;}
+	.author:first-line		{font-weight: bold;}
+	h1 + .author + .author	{text-align: center; font-family: "Times New Roman"; font-size: 12pt; float: right; margin-bottom:12pt;}
+	code					{text-align : left;}
+	table					{border-collapse :collapse; }
+	th						{font-weight: bold; text-align: center; border-width : 2px; border-style: solid; padding: 4px;}
+	td						{text-align: center; border-width : 2px; border-style: solid; padding: 4px;}
+	cite					{font-style: normal;}
+	caption					{caption-side: bottom;}
+	.figCaption				{margin-bottom: 10pt; margin-top: 10pt; font-weight: bold; text-align: center;}
+	.figCaption:before		{font-weight: bold; text-align: center; content: "Figure " counter(figCounter) ". "; counter-increment: figCounter;}
+	.tabCaption				{margin-bottom: 10pt; margin-top: 10pt; font-weight: bold; text-align: center;}
+	.tabCaption:before		{font-weight: bold; text-align: center; content: "Table " counter(tabCounter) ". "; counter-increment: tabCounter;}
+	.footnote:before		{vertical-align: super; font-size: 6pt; content: counter(footCounter) "  "; counter-increment: footCounter;}
+	.copyrightBox			{font-size: 8pt; }
+}
+@media print{
+	a						{color:black; text-decoration: none;}
+	}
+@media screen{
+	img						{display:block; margin:auto;}
+	table					{margin:auto;}
+	code					{margin:auto;}
+	math					{margin:auto;}
+	.abstract				{clear:both;}
+	.figCaption				{margin:auto; text-align : center;}
+	.tabCaption				{margin:auto; text-align : center;}
+	.mathCaption			{margin:auto; text-align : center;}
+	}
+@page						{margin-top: 1.905cm; margin-bottom: 2.5cm; padding: 0;}
