@@ -21,10 +21,56 @@
    	GNU General Public License.
     More info at: http://sourceforge.net/projects/jsbibtex/  
    	BibTex-0.1.2.js is copyright 2008 Steve Hannah. 
- */
-var paperLayout = {
-    container : [],
-	getDpi : function(){
+   	*/
+   	var paperLayout = {
+   		container : [],
+   		getDpi : function(){
+			//Calculate the dpi of the screen
+			var testDiv = document.createElement("div");
+			document.body.appendChild(testDiv);
+			testDiv.style.height = "1in";
+			testDiv.style.width = "1in";
+			var dpiString = document.defaultView.getComputedStyle(testDiv,null).height; 
+			dpiString = dpiString.substring(0, (dpiString.length - 2));
+			this.dpi = parseInt(dpiString, 10);
+			console.log("DPI: " + this.dpi);
+			document.body.removeChild(testDiv);
+		},
+
+		getTitle : function(){
+			var title = document.getElementsByTagName('title')[0].text;
+			document.getElementById('title-text').innerHTML = title;
+		},
+
+		getAbstract : function(){
+			var metas = document.getElementsByTagName('meta'); 
+
+			for (i = 0; i < metas.length; i++) { 
+				if (metas[i].getAttribute('name') == 'abstract') {
+					document.getElementById('abstract-text').innerHTML = metas[i].getAttribute('content');
+				} 
+			}
+		},
+
+		getKeywords : function() {
+			var keywords = document.getElementsByTagName('meta');
+			for (i = 0; i < keywords.length; i++) { 
+				if (keywords[i].getAttribute('name') == 'keywords') {
+					document.getElementById('keywords').innerHTML = keywords[i].getAttribute('content');
+				} 
+			}
+		},
+
+		getACMKeywords : function() {
+			var acm = document.getElementsByTagName('meta');
+			for (i = 0; i < acm.length; i++) { 
+				if (acm[i].getAttribute('name') == 'acm-keywords') {
+					document.getElementById('acm-keywords').innerHTML = acm[i].getAttribute('content');
+				} 
+			}
+		},
+
+		getDpi : function(){
 		//Calculate the dpi of the screen
 		var testDiv = document.createElement("div");
 		document.body.appendChild(testDiv);
@@ -41,23 +87,23 @@ var paperLayout = {
 		console.log("Type: " + this.type);
 		switch(this.type){
 			case "sigchi": 	elements = document.getElementsByClassName('abstract');
-							element = elements[0];
-				break;
+			element = elements[0];
+			break;
 			case "infovis": if(document.getElementsByClassName('diamondRule')[0]){
-								elements = document.getElementsByClassName('diamondRule');
-								element = elements[0].nextElementSibling;
-								}
-							else{
-								elements = document.getElementsByClassName('keywords');
-								element = elements[1].nextElementSibling;
-							}
-				break;
+				elements = document.getElementsByClassName('diamondRule');
+				element = elements[0].nextElementSibling;
+			}
+			else{
+				elements = document.getElementsByClassName('keywords');
+				element = elements[1].nextElementSibling;
+			}
+			break;
 			case "lncs": 	elements = document.getElementsByClassName('keywords');
-							element = elements[1].nextElementSibling;
-				break;
+			element = elements[1].nextElementSibling;
+			break;
 			case "chiextended": elements = document.getElementsByClassName('author');
-								element = elements[0];
-				break;									
+			element = elements[0];
+			break;									
 		}	
 		return element;
 	},
@@ -81,21 +127,21 @@ var paperLayout = {
 			elementHeight += marginBottom;
 		}	
 		return elementHeight;	
-		},	
+	},	
 	getElementTop: function(node){
 		//returns the distance between the top margin of the element and the top margin of the parent element. Unit is pixel.
 		var topString = document.defaultView.getComputedStyle(node, null).top;
 		topString = topString.substring(0, (topString.length - 2));
 		var elementTop = parseInt(topString, 10);
 		return elementTop;						
-		},	
+	},	
 	getElementBottom: function(node){
 		//returns the distance between the top margin of the element and the top margin of the parent element. Unit is pixel.
 		var bottomString = document.defaultView.getComputedStyle(node, null).bottom;
 		bottomString = bottomString.substring(0, (bottomString.length - 2));
 		var elementBottom = parseInt(bottomString, 10);
 		return elementBottom;						
-		},	
+	},	
 	getCopyrightBoxHeight: function(columnWidthPX){			
 		//returns the height of the copyright box.
 		var node = document.getElementById("copyrightBox");
@@ -106,84 +152,89 @@ var paperLayout = {
 		var height = parseInt(heightString, 10);
 		return height;	
 	},	
-    initialize : function(){
+	initialize : function(){
 		this.getDpi();
+		this.getTitle();
+		this.getAbstract();
+		this.getKeywords();
+		this.getACMKeywords();
+
 		//Get the name of the used stylesheet:
-        var url = document.styleSheets[0].href;
-        var styleSheetName = "styleSheet";
-        var styleSheetNames = [/sigchi.css$/, /chiextended.css$/, /lncs.css$/, /infovis.css$/];
-        for (var i = 0; i < 4; i++) {           
-            if (styleSheetNames[i].exec(url)) {
-                styleSheetName = styleSheetNames[i].exec(url).toString();
-                styleSheetName = styleSheetName.substring(0, (styleSheetName.length - 4));               
-            }
-        }
-        this.type = styleSheetName;
+		var url = document.styleSheets[0].href;
+		var styleSheetName = "styleSheet";
+		var styleSheetNames = [/sigchi.css$/, /chiextended.css$/, /lncs.css$/, /infovis.css$/];
+		for (var i = 0; i < 4; i++) {           
+			if (styleSheetNames[i].exec(url)) {
+				styleSheetName = styleSheetNames[i].exec(url).toString();
+				styleSheetName = styleSheetName.substring(0, (styleSheetName.length - 4));               
+			}
+		}
+		this.type = styleSheetName;
 		switch(this.type){
 			case "sigchi":		this.pageWidth = 17.78;
-	            				this.pageHeight = 23.495;
-	            				this.columnCount = 2;			
-	            				this.columnGap = 0.8382;
-								this.columnWidth = 8.382;								
-								if(this.medium ==="screen"){
-									this.columnCount = 1;
-									this.columnGap = 0;
-									this.columnWidth = this.pageWidth;
-								}
-								this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));
-								this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
-								this.copyrightBoxHeight = this.getCopyrightBoxHeight(this.columnWidthPX);
-								this.columnHeight = this.pageHeight;
-								this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi));		
-		
-				break;
-			case "chiextended": this.pageWidth = 23.495;
-					            this.pageHeight = 17.78;
-					            this.columnCount = 2;			
-					            this.columnGap = 0.8382;
-								this.columnWidth = 8.382;
-								if(this.medium ==="screen"){
-									this.columnCount = 1;
-									this.columnGap = 0;
-									this.columnWidth = this.pageWidth;
-								}
-								this.fullImgPage = 5;
-								this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));
-								this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
-								this.copyrightBoxHeight = this.getCopyrightBoxHeight(this.columnWidthPX);
-								this.columnHeight = this.pageHeight;
-								this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi));
-				break;
-			case "lncs": 	this.pageWidth = 12.2;			
-					            this.pageHeight = 19.3;
-								this.columnCount = 1;
-								this.columnGap = 0;	
-								this.columnWidth = this.pageWidth;
-								this.copyrightBoxHeight = 0;
-								this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));			           
-								this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
-								this.columnHeight = this.pageHeight; 
-								this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi));
-				break;
-			case "infovis":		this.pageWidth = 18.1102;			
-					            this.pageHeight = 24.4475;
-								this.columnCount = 2;
-								this.columnGap = 0.4191;	
-								this.columnWidth = 8.8392;
-								if(this.medium ==="screen"){
-									this.columnCount = 1;
-									this.columnGap = 0;
-									this.columnWidth = this.pageWidth;
-								}		
-								this.tableBorder = 1;
-								this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));
-								this.tableBorderPX = Math.round(this.tableBorder / (2.54 / this.dpi));	           
-								this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
-								this.copyrightBoxHeight = this.getCopyrightBoxHeight(this.columnWidthPX);
-								this.columnHeight = this.pageHeight;
-								this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi)); 								 
-				break;				
+			this.pageHeight = 23.495;
+			this.columnCount = 2;			
+			this.columnGap = 0.8382;
+			this.columnWidth = 8.382;								
+			if(this.medium ==="screen"){
+				this.columnCount = 1;
+				this.columnGap = 0;
+				this.columnWidth = this.pageWidth;
 			}
+			this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));
+			this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
+			this.copyrightBoxHeight = this.getCopyrightBoxHeight(this.columnWidthPX);
+			this.columnHeight = this.pageHeight;
+			this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi));		
+			
+			break;
+			case "chiextended": this.pageWidth = 23.495;
+			this.pageHeight = 17.78;
+			this.columnCount = 2;			
+			this.columnGap = 0.8382;
+			this.columnWidth = 8.382;
+			if(this.medium ==="screen"){
+				this.columnCount = 1;
+				this.columnGap = 0;
+				this.columnWidth = this.pageWidth;
+			}
+			this.fullImgPage = 5;
+			this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));
+			this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
+			this.copyrightBoxHeight = this.getCopyrightBoxHeight(this.columnWidthPX);
+			this.columnHeight = this.pageHeight;
+			this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi));
+			break;
+			case "lncs": 	this.pageWidth = 12.2;			
+			this.pageHeight = 19.3;
+			this.columnCount = 1;
+			this.columnGap = 0;	
+			this.columnWidth = this.pageWidth;
+			this.copyrightBoxHeight = 0;
+			this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));			           
+			this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
+			this.columnHeight = this.pageHeight; 
+			this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi));
+			break;
+			case "infovis":		this.pageWidth = 18.1102;			
+			this.pageHeight = 24.4475;
+			this.columnCount = 2;
+			this.columnGap = 0.4191;	
+			this.columnWidth = 8.8392;
+			if(this.medium ==="screen"){
+				this.columnCount = 1;
+				this.columnGap = 0;
+				this.columnWidth = this.pageWidth;
+			}		
+			this.tableBorder = 1;
+			this.columnGapPX = Math.round(this.columnGap / (2.54 / this.dpi));
+			this.tableBorderPX = Math.round(this.tableBorder / (2.54 / this.dpi));	           
+			this.columnWidthPX = Math.round(this.columnWidth / (2.54 / this.dpi));
+			this.copyrightBoxHeight = this.getCopyrightBoxHeight(this.columnWidthPX);
+			this.columnHeight = this.pageHeight;
+			this.columnHeightPX = Math.round(this.columnHeight / (2.54 / this.dpi)); 								 
+			break;				
+		}
 		//insert infovis diamond rule
 		if (this.type === "infovis"){
 			var tempContent = document.createElement("div");
@@ -201,9 +252,9 @@ var paperLayout = {
 		while (element) {
 			if((this.getElementTop(element) !==  this.getElementTop(element.nextElementSibling)) || element.nextElementSibling === firstMultiColumnElement){	
 				predecessorHeightPX += this.getElementHeight(element);
-				}	
+			}	
 			element = element.previousElementSibling;			
-			}				
+		}				
 		this.frontColumnHeightPX = this.columnHeightPX - predecessorHeightPX;				
 		//Calculate the Height of one textline
 		var testLine = document.createElement("p");
@@ -212,7 +263,7 @@ var paperLayout = {
 		testLine.appendChild(newTextNode);		
 		this.lineHeight = this.getElementHeight(testLine); 
 		document.body.removeChild(testLine);
-		},
+	},
 	calculateRemainingSpace : function (mode) {
 		//Returns the remaining space in the column
 		var remainingSpace = 0;
@@ -222,7 +273,7 @@ var paperLayout = {
 				remainingSpace = this.frontColumnHeightPX - this.copyrightBoxHeight;
 				if(childnumber === 8){
 					remainingSpace = 0;
-					}					
+				}					
 			}	
 			else if (this.currentContainer === 0) {
 				remainingSpace = this.frontColumnHeightPX - this.copyrightBoxHeight - this.getElementHeight(this.container[this.currentContainer]);	
@@ -230,15 +281,15 @@ var paperLayout = {
 			else if (this.currentContainer === 1 && this.type !== "lncs") {
 				remainingSpace = this.frontColumnHeightPX - this.getElementHeight(this.container[this.currentContainer]);
 			}
-	        else {
+			else {
 				remainingSpace = this.columnHeightPX - this.getElementHeight(this.container[this.currentContainer]) -  Math.round(1/(2.54 / this.dpi));
 			}	
 		}
 		else if (mode === "lastColumns"){
 			remainingSpace = this.lastPageColumnHeight - this.getElementHeight(this.container[this.currentContainer]);
-			}	
+		}	
 		return remainingSpace;
-		},	
+	},	
 	createColumn : function () {
 		//Creates a new column
 		var newColumn = document.createElement("div");
@@ -249,18 +300,18 @@ var paperLayout = {
 		this.container.push(newColumn);
 		this.container[this.container.length - 1].style.width = this.columnWidthPX +"px";
 		document.body.appendChild(this.container[this.container.length - 1]);
-		},
+	},
 	getColumnHeight : function (){
-			var columnHeight;
-			switch (this.currentContainer){
-				case 0: columnHeight = this.frontColumnHeightPX - this.copyrightBoxHeight;
-					break;
-				case 1: columnHeight = this.frontColumnHeightPX;
-					break;
-				default: this.columnHeightPX; 	
-			}
-			return columnHeight;
-		},
+		var columnHeight;
+		switch (this.currentContainer){
+			case 0: columnHeight = this.frontColumnHeightPX - this.copyrightBoxHeight;
+			break;
+			case 1: columnHeight = this.frontColumnHeightPX;
+			break;
+			default: this.columnHeightPX; 	
+		}
+		return columnHeight;
+	},
 	alignColumns : function () {		
 		if (this.type !== "lncs") {
 			for (var i = 0; i < this.container.length; i++) {
@@ -290,7 +341,7 @@ var paperLayout = {
 				}
 			}
 		}			
-		},
+	},
 	createPageBreaks : function(){
 		var element = document.body.firstElementChild;
 		while(element){		
@@ -316,21 +367,21 @@ var paperLayout = {
 				if (element.previousElementSibling.className === "columns") {
 					document.body.removeChild(element.previousElementSibling);
 					document.body.insertBefore(temp, element);
-					}
+				}
 				else {
 					document.body.insertBefore(temp, element);
-					}
-				}		
+				}
+			}		
 			element = element.nextElementSibling;				
 		}
 		document.body.removeChild(document.body.lastElementChild);
 		document.body.lastElementChild.style.pageBreakAfter = "auto";	
-		},
+	},
 	nextColumn : function (mode){
 		if(mode === "normal"){
 			if (!this.container[this.currentContainer + 1]) {
 				this.createColumn();
-				}
+			}
 			this.currentContainer++;			
 		}
 		else{
@@ -338,7 +389,7 @@ var paperLayout = {
 				this.currentContainer++;
 			}
 		}
-		},
+	},
 	replaceCite : function (node){
 		//replace all cite entries		
 		var nodeChild;
@@ -365,8 +416,8 @@ var paperLayout = {
 							textnode = document.createTextNode("[" + [j+1] + "]"); 
 							link.appendChild(textnode);
 							node.replaceChild(link, nodeChild);			
-							}
 						}
+					}
 					//pictures	
 					if(nodeChild.className === "figCite"){
 						figCounter++;
@@ -377,7 +428,7 @@ var paperLayout = {
 						textnode = document.createTextNode("Figure " + figCounter); 
 						link.appendChild(textnode);
 						node.replaceChild(link, nodeChild);										
-						}
+					}
 					//tables	
 					if(nodeChild.className === "tabCite"){
 						tabCounter++;
@@ -388,7 +439,7 @@ var paperLayout = {
 						textnode = document.createTextNode("Table " + tabCounter); 
 						link.appendChild(textnode);
 						node.replaceChild(link, nodeChild);										
-						}	
+					}	
 					//Math	
 					if(nodeChild.className === "mathCite"){
 						mathCounter++;
@@ -399,7 +450,7 @@ var paperLayout = {
 						textnode = document.createTextNode("Formula " + mathCounter); 
 						link.appendChild(textnode);
 						node.replaceChild(link, nodeChild);										
-						}	
+					}	
 					//footnote
 					if(nodeChild.className === "footCite"){
 						footCounter++;
@@ -412,10 +463,10 @@ var paperLayout = {
 						link.style.fontSize = "6pt";
 						link.appendChild(textnode);
 						node.replaceChild(link, nodeChild);										
-						}											
-					}				
+					}											
+				}				
 				nodeChild = nextNodeChild;					
-				}			
+			}			
 		}			
 		else if (node.nodeName === "ol" || node.nodeName === "ul"){
 			nodeChild = node.firstElementChild;
@@ -440,7 +491,7 @@ var paperLayout = {
 				nodeChild = nodeChild.nextElementSibling;		
 			}
 		}
-		},
+	},
 	createHeadlineCounter : function(){
 		//Create headline counter
 		if (this.type === "lncs" || this.type === "infovis") {
@@ -468,7 +519,7 @@ var paperLayout = {
 				element = element.nextElementSibling;
 			}
 		}		
-		},
+	},
 	createListCounter: function(){
 		//Create Ordered List counter
 		var element = document.body.firstElementChild;
@@ -479,18 +530,18 @@ var paperLayout = {
 		var counterStyleAfter;
 		switch(this.type){
 			case "sigchi": 	counterStyleBefore = "";
-							counterStyleAfter = ". ";		
-				break;
+			counterStyleAfter = ". ";		
+			break;
 			case "chiextended": counterStyleBefore = "[";
-								counterStyleAfter = "] ";
-				break;
+			counterStyleAfter = "] ";
+			break;
 			case "lncs":	counterStyleBefore = "[";
-							counterStyleAfter = "] ";
-				break;
+			counterStyleAfter = "] ";
+			break;
 			case "infovis":	counterStyleBefore = "[";
-							counterStyleAfter = "] ";									 
-				break;
-			}		
+			counterStyleAfter = "] ";									 
+			break;
+		}		
 		while (element) {			
 			if (this.medium === "print") {
 				var child = element.firstElementChild;								
@@ -516,25 +567,25 @@ var paperLayout = {
 			}
 			else {
 				if (element.nodeName === "ol") {
-						if (!(element.previousElementSibling.nodeName === "ol")) {
-							liCounter = 0;
-						}
-						var grandchild = element.firstElementChild;
-						while (grandchild) {
-							liCounter++;
-							newLi = document.createElement("li");
-							newTextNode = document.createTextNode(counterStyleBefore + liCounter.toString() + counterStyleAfter);
-							newLi.appendChild(newTextNode);
-							newLi.style.marginLeft = 0;
-							newLi.style.cssFloat = "left";
-							element.insertBefore(newLi, grandchild);
-							grandchild = grandchild.nextElementSibling;
-						}
+					if (!(element.previousElementSibling.nodeName === "ol")) {
+						liCounter = 0;
 					}
+					var grandchild = element.firstElementChild;
+					while (grandchild) {
+						liCounter++;
+						newLi = document.createElement("li");
+						newTextNode = document.createTextNode(counterStyleBefore + liCounter.toString() + counterStyleAfter);
+						newLi.appendChild(newTextNode);
+						newLi.style.marginLeft = 0;
+						newLi.style.cssFloat = "left";
+						element.insertBefore(newLi, grandchild);
+						grandchild = grandchild.nextElementSibling;
+					}
+				}
 			}
 			element = element.nextElementSibling;
-			}		
-		},
+		}		
+	},
 	alignImages: function(){
 		//Align Images
 		if(!(this.type === "lncs" || this.type === "chiextended")){
@@ -552,7 +603,7 @@ var paperLayout = {
 				element = element.nextElementSibling;
 			}			
 		}		
-		},
+	},
 	alignFootnotes : function(){
 		//Align Footnotes
 		var element = document.body.firstElementChild;
@@ -580,12 +631,12 @@ var paperLayout = {
 				element = element.nextElementSibling;
 			}else{
 				if (element.className === "footnote") {
-						document.body.lastElementChild.appendChild(element);
-					}
-				element = element.nextElementSibling;				
+					document.body.lastElementChild.appendChild(element);
 				}
-			}		
-		},			
+				element = element.nextElementSibling;				
+			}
+		}		
+	},			
 	alignFullPageImg : function(img){
 		//Align ChiExtended Full Page Image
 		document.body.appendChild(img);
@@ -599,33 +650,33 @@ var paperLayout = {
 				widthString = widthString.substring(0, (widthString.length - 2));
 				var width = parseInt(widthString, 10);
 				child.style.marginLeft = width + (this.columnGapPX / 2) +"px";
-				}
-			child = child.nextElementSibling;
 			}
+			child = child.nextElementSibling;
+		}
 		for(var i = 0; i < this.fullImgPage; i++){
 			if(element.nextElementSibling){
 				element = element.nextElementSibling;
-				}
-			}	
+			}
+		}	
 		var temp = document.getElementById("fullPageImg");		
 		document.body.insertBefore(temp, element);							
-		},
+	},
 	fillColumns : function (element, mode) {
 		var tempElement;
 		var remainingSpace;
 		while (element) {
 			if(element.className === "column"){
 				break;
-				}
+			}
 			remainingSpace = this.calculateRemainingSpace(mode);
 			if (mode === "normal"){
 				if (!(element.nodeName === "img" || element.nodeName === "math" ||  element.nodeName === "hr" || element.className === "author")) {
-						element.style.width = this.columnWidthPX +"px";
-					}
+					element.style.width = this.columnWidthPX +"px";
+				}
 				if (element.nodeName === "table" && this.type === "infovis") {
 					element.style.width = this.columnWidthPX-(this.tableBorderPX*2) +"px";
-					}				
-				}					
+				}				
+			}					
 			if ((element.nodeName === "p" || element.nodeName === "code") && (remainingSpace < this.getElementHeight(element))) {												
 				if (remainingSpace < (this.lineHeight * 2)) {				
 					this.nextColumn(mode);
@@ -759,8 +810,8 @@ var paperLayout = {
 					if(this.container[this.currentContainer - 1].hasChildNodes()){
 						if (this.container[this.currentContainer - 1] && this.container[this.currentContainer - 1].lastElementChild.nodeName === "h2" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h3" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h4" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h5" || this.container[this.currentContainer - 1].lastElementChild.nodeName === "h6") {
 							this.container[this.currentContainer].insertBefore(this.container[this.currentContainer - 1].lastElementChild, tempElement);
-							}
 						}
+					}
 				}
 				//enough space:
 				else{
@@ -787,10 +838,10 @@ var paperLayout = {
 				if(this.type === "lncs" || this.type === "chiextended"){
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);	
-	
-						this.container[this.currentContainer].appendChild(tempElement);
-						this.container[this.currentContainer].appendChild(tempCaption);
-											
+					
+					this.container[this.currentContainer].appendChild(tempElement);
+					this.container[this.currentContainer].appendChild(tempCaption);
+					
 					element = element.nextElementSibling;
 					element = element.nextElementSibling;
 				}
@@ -799,8 +850,8 @@ var paperLayout = {
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);	
 
-						this.container[this.currentContainer].insertBefore(tempCaption, this.container[this.currentContainer].firstElementChild);			
-						this.container[this.currentContainer].insertBefore(tempElement, this.container[this.currentContainer].firstElementChild);
+					this.container[this.currentContainer].insertBefore(tempCaption, this.container[this.currentContainer].firstElementChild);			
+					this.container[this.currentContainer].insertBefore(tempElement, this.container[this.currentContainer].firstElementChild);
 					
 					element = element.nextElementSibling;
 					element = element.nextElementSibling;
@@ -810,8 +861,8 @@ var paperLayout = {
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);
 
-						this.container[this.currentContainer].appendChild(tempElement);
-						this.container[this.currentContainer].appendChild(tempCaption);	
+					this.container[this.currentContainer].appendChild(tempElement);
+					this.container[this.currentContainer].appendChild(tempCaption);	
 					
 					element = element.nextElementSibling;	
 					element = element.nextElementSibling;
@@ -827,8 +878,8 @@ var paperLayout = {
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);
 
-						this.container[this.currentContainer].appendChild(tempElement);
-						this.container[this.currentContainer].appendChild(tempCaption);	
+					this.container[this.currentContainer].appendChild(tempElement);
+					this.container[this.currentContainer].appendChild(tempCaption);	
 					
 					element = element.nextElementSibling;
 					element = element.nextElementSibling;
@@ -947,800 +998,800 @@ var paperLayout = {
 							this.container[this.currentContainer].appendChild(tempElement);
 							element = element.nextElementSibling;
 						}
-		}			
-		},
-	parseBibtex :function(){
-		this.documentCitationList = [];
-		var bibtex = new BibTex();
-		var tempListEntry;	
-		var newTextNode;	
-		var newLink;
-		var tempDiv;		
-		var tempElement = document.createElement("ol");
-		bibtex.content = document.getElementById("bibTex").contentDocument.body.firstChild.wholeText;
-		bibtex.parse();
- 		for (var i in bibtex.data) {
-			this.documentCitationList.push(bibtex.data[i]['cite']);
-			tempListEntry = document.createElement("li");			
-			if (this.medium === "screen") {
-				newLink = document.createElement("a");
-				newLink.href = "#cite_ref"+bibtex.data[i]['cite'];
-				newTextNode = document.createTextNode("↑");
-				newLink.appendChild(newTextNode);
-				tempListEntry.appendChild(newLink);		
-				}
-			newTextNode = document.createTextNode("");	
-			switch (bibtex.data[i].entryType) {
-				case "article":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					tempDiv = document.createElement("div");
-					tempDiv.style.fontStyle = "italic";
-					tempDiv.style.display = "inline";
-					tempDiv.appendChild(document.createTextNode(bibtex.data[i]['journal'] + ". "));
-					tempListEntry.appendChild(newTextNode);
-					tempListEntry.appendChild(tempDiv);
-					newTextNode = document.createTextNode("");
-					if (bibtex.data[i]['year']) {
-						newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					}					
-					if (bibtex.data[i]['volume']) {
-						newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['pages']) {
-						newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
 					}			
-					tempListEntry.id = bibtex.data[i]['cite'];					
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "book":
-					if (bibtex.data[i]['author']) {
-						for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+				},
+				parseBibtex :function(){
+					this.documentCitationList = [];
+					var bibtex = new BibTex();
+					var tempListEntry;	
+					var newTextNode;	
+					var newLink;
+					var tempDiv;		
+					var tempElement = document.createElement("ol");
+					bibtex.content = document.getElementById("bibTex").contentDocument.body.firstChild.wholeText;
+					bibtex.parse();
+					for (var i in bibtex.data) {
+						this.documentCitationList.push(bibtex.data[i]['cite']);
+						tempListEntry = document.createElement("li");			
+						if (this.medium === "screen") {
+							newLink = document.createElement("a");
+							newLink.href = "#cite_ref"+bibtex.data[i]['cite'];
+							newTextNode = document.createTextNode("↑");
+							newLink.appendChild(newTextNode);
+							tempListEntry.appendChild(newLink);		
 						}
+						newTextNode = document.createTextNode("");	
+						switch (bibtex.data[i].entryType) {
+							case "article":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							tempDiv = document.createElement("div");
+							tempDiv.style.fontStyle = "italic";
+							tempDiv.style.display = "inline";
+							tempDiv.appendChild(document.createTextNode(bibtex.data[i]['journal'] + ". "));
+							tempListEntry.appendChild(newTextNode);
+							tempListEntry.appendChild(tempDiv);
+							newTextNode = document.createTextNode("");
+							if (bibtex.data[i]['year']) {
+								newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							}					
+							if (bibtex.data[i]['volume']) {
+								newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['pages']) {
+								newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}			
+							tempListEntry.id = bibtex.data[i]['cite'];					
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "book":
+							if (bibtex.data[i]['author']) {
+								for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+								}
+							}
+							else {
+								for (var j = 0; j < bibtex.data[i]['editor'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['editor'][j]['last'] + " " + bibtex.data[i]['editor'][j]['first'] + ", ");
+								}
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							newTextNode.appendData(bibtex.data[i]['publisher'] + ". ");
+							if (bibtex.data[i]['volume']) {
+								newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['series']) {
+								newTextNode.appendData(bibtex.data[i]['series'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['edition']) {
+								newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							newTextNode.appendData(bibtex.data[i]['year'] + ", ");
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "booklet":
+							if (bibtex.data[i]['author']) {
+								for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+								}
+								newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							}
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							if (bibtex.data[i]['howpublished']) {
+								newTextNode.appendData(bibtex.data[i]['howpublished'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							if (bibtex.data[i]['year']) {
+								newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "conference":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							tempDiv = document.createElement("div");
+							tempDiv.style.fontStyle = "italic";
+							tempDiv.style.display = "inline";
+							tempDiv.appendChild(document.createTextNode(bibtex.data[i]['booktitle'] + ". "));
+							tempListEntry.appendChild(newTextNode);
+							tempListEntry.appendChild(tempDiv);
+							newTextNode = document.createTextNode("");
+							newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							if (bibtex.data[i]['editor']) {
+								newTextNode.appendData(bibtex.data[i]['editor'] + ", ");
+							}
+							if (bibtex.data[i]['volume']) {
+								newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['series']) {
+								newTextNode.appendData(bibtex.data[i]['series'] + ", ");
+							}
+							if (bibtex.data[i]['pages']) {
+								newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							if (bibtex.data[i]['organization']) {
+								newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
+							}
+							if (bibtex.data[i]['publisher']) {
+								newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "inbook":
+							if (bibtex.data[i]['author']) {
+								for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+								}
+							}
+							else {
+								for (var j = 0; j < bibtex.data[i]['editor'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['editor'][j]['last'] + " " + bibtex.data[i]['editor'][j]['first'] + ", ");
+								}
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							if (bibtex.data[i]['chapter']) {
+								newTextNode.appendData(bibtex.data[i]['chapter'] + ", ");
+							}
+							if (bibtex.data[i]['pages']) {
+								newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
+							}
+							newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
+							newTextNode.appendData(+bibtex.data[i]['year'] + ", ");
+							if (bibtex.data[i]['volume']) {
+								newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['series']) {
+								newTextNode.appendData(bibtex.data[i]['series'] + ", ");
+							}
+							if (bibtex.data[i]['type']) {
+								newTextNode.appendData(bibtex.data[i]['type'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['edition']) {
+								newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "incollection":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							tempDiv = document.createElement("div");
+							tempDiv.style.fontStyle = "italic";
+							tempDiv.style.display = "inline";
+							tempDiv.appendChild(document.createTextNode(bibtex.data[i]['booktitle'] + ". "));
+							tempListEntry.appendChild(newTextNode);
+							tempListEntry.appendChild(tempDiv);
+							newTextNode = document.createTextNode("");
+							newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
+							newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							if (bibtex.data[i]['editor']) {
+								newTextNode.appendData(bibtex.data[i]['editor'] + ", ");
+							}
+							if (bibtex.data[i]['volume']) {
+								newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['series']) {
+								newTextNode.appendData(bibtex.data[i]['series'] + ", ");
+							}
+							if (bibtex.data[i]['type']) {
+								newTextNode.appendData(bibtex.data[i]['type'] + ", ");
+							}
+							if (bibtex.data[i]['chapter']) {
+								newTextNode.appendData(bibtex.data[i]['chapter'] + ", ");
+							}
+							if (bibtex.data[i]['pages']) {
+								newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['edition']) {
+								newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "inproceedings":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							tempDiv = document.createElement("div");
+							tempDiv.style.fontStyle = "italic";
+							tempDiv.style.display = "inline";
+							tempDiv.appendChild(document.createTextNode(bibtex.data[i]['booktitle'] + ". "));
+							tempListEntry.appendChild(newTextNode);
+							tempListEntry.appendChild(tempDiv);
+							newTextNode = document.createTextNode("");
+							if (bibtex.data[i]['year']) {
+								newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							}				
+							if (bibtex.data[i]['editor']) {
+								newTextNode.appendData(bibtex.data[i]['editor'] + ", ");
+							}
+							if (bibtex.data[i]['volume']) {
+								newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['series']) {
+								newTextNode.appendData(bibtex.data[i]['series'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							if (bibtex.data[i]['organization']) {
+								newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
+							}
+							if (bibtex.data[i]['publisher']) {
+								newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
+							}
+							if (bibtex.data[i]['pages']) {
+								newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "manual":
+							if (bibtex.data[i]['author']) {
+								for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+								}
+								newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							}
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							if (bibtex.data[i]['organization']) {
+								newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['edition']) {
+								newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							if (bibtex.data[i]['year']) {
+								newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "masterthesis":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							newTextNode.appendData(bibtex.data[i]['school'] + ". ");
+							newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							if (bibtex.data[i]['type']) {
+								newTextNode.appendData(bibtex.data[i]['type'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "misc":
+							if (bibtex.data[i]['author']) {
+								for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+								}
+								newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							}
+							if (bibtex.data[i]['title']) {
+								newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							}
+							if (bibtex.data[i]['howpublished']) {
+								newTextNode.appendData(bibtex.data[i]['howpublished'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							if (bibtex.data[i]['year']) {
+								newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "phdthesis":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							newTextNode.appendData(bibtex.data[i]['school'] + ". ");
+							newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							if (bibtex.data[i]['type']) {
+								newTextNode.appendData(bibtex.data[i]['type'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "proceedings":
+							if (bibtex.data[i]['editor']) {
+								for (var j = 0; j < bibtex.data[i]['editor'].length; j++) {
+									newTextNode.appendData(bibtex.data[i]['editor'][j]['last'] + " " + bibtex.data[i]['editor'][j]['first'] + ", ");
+								}
+								newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							}
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							if (bibtex.data[i]['volume']) {
+								newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['series']) {
+								newTextNode.appendData(bibtex.data[i]['series'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							if (bibtex.data[i]['organization']) {
+								newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
+							}
+							if (bibtex.data[i]['publisher']) {
+								newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "techreport":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							newTextNode.appendData(bibtex.data[i]['institution'] + ". ");
+							newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							if (bibtex.data[i]['type']) {
+								newTextNode.appendData(bibtex.data[i]['type'] + ", ");
+							}
+							if (bibtex.data[i]['number']) {
+								newTextNode.appendData(bibtex.data[i]['number'] + ", ");
+							}
+							if (bibtex.data[i]['address']) {
+								newTextNode.appendData(bibtex.data[i]['address'] + ", ");
+							}
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+							case "unpublished":
+							for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
+								newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '');
+							newTextNode.appendData(bibtex.data[i]['title'] + ". ");
+							if (bibtex.data[i]['month']) {
+								newTextNode.appendData(bibtex.data[i]['month'] + ", ");
+							}
+							if (bibtex.data[i]['year']) {
+								newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
+							}
+							newTextNode.replaceData(newTextNode.length - 2, 1, '.');
+							tempListEntry.appendChild(newTextNode);
+							if (bibtex.data[i]['note']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
+								tempListEntry.appendChild(newTextNode);
+							}
+							if (bibtex.data[i]['url']) {
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = bibtex.data[i]['url'];
+								newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}	
+							else if(this.medium === "screen"){
+								tempListEntry.appendChild(document.createElement("br"));
+								newLink = document.createElement("a");
+								newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
+								newTextNode = document.createTextNode("Search Google Scholar.");
+								newLink.appendChild(newTextNode);
+								tempListEntry.appendChild(newLink);
+							}
+							tempListEntry.id = bibtex.data[i]['cite'];
+							tempElement.appendChild(tempListEntry);
+							break;
+						}	
+					}
+					document.getElementById("bibTex").parentNode.insertBefore(tempElement, document.getElementById("references").nextSibling);
+					document.getElementById("bibTex").parentNode.removeChild(document.getElementById("bibTex"));
+				},
+				createPaper : function (medium) {		
+					var fullPageImg;
+					this.medium = medium;
+					this.currentContainer = 0;
+					this.initialize();
+					this.parseBibtex();
+					this.createColumn();
+					if(this.type === "chiextended" && this.medium === "print"){
+						fullPageImg = document.getElementById("fullPageImg");
+						document.body.removeChild(document.getElementById("fullPageImg"));
 					}
-					else {
-						for (var j = 0; j < bibtex.data[i]['editor'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['editor'][j]['last'] + " " + bibtex.data[i]['editor'][j]['first'] + ", ");
-						}
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					newTextNode.appendData(bibtex.data[i]['publisher'] + ". ");
-					if (bibtex.data[i]['volume']) {
-						newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['series']) {
-						newTextNode.appendData(bibtex.data[i]['series'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['edition']) {
-						newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					newTextNode.appendData(bibtex.data[i]['year'] + ", ");
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "booklet":
-					if (bibtex.data[i]['author']) {
-						for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-						}
-						newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					}
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					if (bibtex.data[i]['howpublished']) {
-						newTextNode.appendData(bibtex.data[i]['howpublished'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					if (bibtex.data[i]['year']) {
-						newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "conference":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					tempDiv = document.createElement("div");
-					tempDiv.style.fontStyle = "italic";
-					tempDiv.style.display = "inline";
-					tempDiv.appendChild(document.createTextNode(bibtex.data[i]['booktitle'] + ". "));
-					tempListEntry.appendChild(newTextNode);
-					tempListEntry.appendChild(tempDiv);
-					newTextNode = document.createTextNode("");
-					newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					if (bibtex.data[i]['editor']) {
-						newTextNode.appendData(bibtex.data[i]['editor'] + ", ");
-					}
-					if (bibtex.data[i]['volume']) {
-						newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['series']) {
-						newTextNode.appendData(bibtex.data[i]['series'] + ", ");
-					}
-					if (bibtex.data[i]['pages']) {
-						newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					if (bibtex.data[i]['organization']) {
-						newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
-					}
-					if (bibtex.data[i]['publisher']) {
-						newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "inbook":
-					if (bibtex.data[i]['author']) {
-						for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-						}
-					}
-					else {
-						for (var j = 0; j < bibtex.data[i]['editor'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['editor'][j]['last'] + " " + bibtex.data[i]['editor'][j]['first'] + ", ");
-						}
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					if (bibtex.data[i]['chapter']) {
-						newTextNode.appendData(bibtex.data[i]['chapter'] + ", ");
-					}
-					if (bibtex.data[i]['pages']) {
-						newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
-					}
-					newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
-					newTextNode.appendData(+bibtex.data[i]['year'] + ", ");
-					if (bibtex.data[i]['volume']) {
-						newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['series']) {
-						newTextNode.appendData(bibtex.data[i]['series'] + ", ");
-					}
-					if (bibtex.data[i]['type']) {
-						newTextNode.appendData(bibtex.data[i]['type'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['edition']) {
-						newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "incollection":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					tempDiv = document.createElement("div");
-					tempDiv.style.fontStyle = "italic";
-					tempDiv.style.display = "inline";
-					tempDiv.appendChild(document.createTextNode(bibtex.data[i]['booktitle'] + ". "));
-					tempListEntry.appendChild(newTextNode);
-					tempListEntry.appendChild(tempDiv);
-					newTextNode = document.createTextNode("");
-					newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
-					newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					if (bibtex.data[i]['editor']) {
-						newTextNode.appendData(bibtex.data[i]['editor'] + ", ");
-					}
-					if (bibtex.data[i]['volume']) {
-						newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['series']) {
-						newTextNode.appendData(bibtex.data[i]['series'] + ", ");
-					}
-					if (bibtex.data[i]['type']) {
-						newTextNode.appendData(bibtex.data[i]['type'] + ", ");
-					}
-					if (bibtex.data[i]['chapter']) {
-						newTextNode.appendData(bibtex.data[i]['chapter'] + ", ");
-					}
-					if (bibtex.data[i]['pages']) {
-						newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['edition']) {
-						newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "inproceedings":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					tempDiv = document.createElement("div");
-					tempDiv.style.fontStyle = "italic";
-					tempDiv.style.display = "inline";
-					tempDiv.appendChild(document.createTextNode(bibtex.data[i]['booktitle'] + ". "));
-					tempListEntry.appendChild(newTextNode);
-					tempListEntry.appendChild(tempDiv);
-					newTextNode = document.createTextNode("");
-					if (bibtex.data[i]['year']) {
-						newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					}				
-					if (bibtex.data[i]['editor']) {
-						newTextNode.appendData(bibtex.data[i]['editor'] + ", ");
-					}
-					if (bibtex.data[i]['volume']) {
-						newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['series']) {
-						newTextNode.appendData(bibtex.data[i]['series'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					if (bibtex.data[i]['organization']) {
-						newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
-					}
-					if (bibtex.data[i]['publisher']) {
-						newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
-					}
-					if (bibtex.data[i]['pages']) {
-						newTextNode.appendData(bibtex.data[i]['pages'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "manual":
-					if (bibtex.data[i]['author']) {
-						for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-						}
-						newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					}
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					if (bibtex.data[i]['organization']) {
-						newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['edition']) {
-						newTextNode.appendData(bibtex.data[i]['edition'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					if (bibtex.data[i]['year']) {
-						newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "masterthesis":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					newTextNode.appendData(bibtex.data[i]['school'] + ". ");
-					newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					if (bibtex.data[i]['type']) {
-						newTextNode.appendData(bibtex.data[i]['type'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "misc":
-					if (bibtex.data[i]['author']) {
-						for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-						}
-						newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					}
-					if (bibtex.data[i]['title']) {
-						newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					}
-					if (bibtex.data[i]['howpublished']) {
-						newTextNode.appendData(bibtex.data[i]['howpublished'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					if (bibtex.data[i]['year']) {
-						newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "phdthesis":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					newTextNode.appendData(bibtex.data[i]['school'] + ". ");
-					newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					if (bibtex.data[i]['type']) {
-						newTextNode.appendData(bibtex.data[i]['type'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "proceedings":
-					if (bibtex.data[i]['editor']) {
-						for (var j = 0; j < bibtex.data[i]['editor'].length; j++) {
-							newTextNode.appendData(bibtex.data[i]['editor'][j]['last'] + " " + bibtex.data[i]['editor'][j]['first'] + ", ");
-						}
-						newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					}
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					if (bibtex.data[i]['volume']) {
-						newTextNode.appendData(bibtex.data[i]['volume'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['series']) {
-						newTextNode.appendData(bibtex.data[i]['series'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					if (bibtex.data[i]['organization']) {
-						newTextNode.appendData(bibtex.data[i]['organization'] + ", ");
-					}
-					if (bibtex.data[i]['publisher']) {
-						newTextNode.appendData(bibtex.data[i]['publisher'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "techreport":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					newTextNode.appendData(bibtex.data[i]['institution'] + ". ");
-					newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					if (bibtex.data[i]['type']) {
-						newTextNode.appendData(bibtex.data[i]['type'] + ", ");
-					}
-					if (bibtex.data[i]['number']) {
-						newTextNode.appendData(bibtex.data[i]['number'] + ", ");
-					}
-					if (bibtex.data[i]['address']) {
-						newTextNode.appendData(bibtex.data[i]['address'] + ", ");
-					}
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				case "unpublished":
-					for (var j = 0; j < bibtex.data[i]['author'].length; j++) {
-						newTextNode.appendData(bibtex.data[i]['author'][j]['last'] + " " + bibtex.data[i]['author'][j]['first'] + ", ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '');
-					newTextNode.appendData(bibtex.data[i]['title'] + ". ");
-					if (bibtex.data[i]['month']) {
-						newTextNode.appendData(bibtex.data[i]['month'] + ", ");
-					}
-					if (bibtex.data[i]['year']) {
-						newTextNode.appendData("(" + bibtex.data[i]['year'] + "), ");
-					}
-					newTextNode.replaceData(newTextNode.length - 2, 1, '.');
-					tempListEntry.appendChild(newTextNode);
-					if (bibtex.data[i]['note']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newTextNode = document.createTextNode(bibtex.data[i]['note'] + ".");
-						tempListEntry.appendChild(newTextNode);
-					}
-					if (bibtex.data[i]['url']) {
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = bibtex.data[i]['url'];
-						newTextNode = document.createTextNode(bibtex.data[i]['url'] + ".");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}	
-					else if(this.medium === "screen"){
-						tempListEntry.appendChild(document.createElement("br"));
-						newLink = document.createElement("a");
-						newLink.href = "http://scholar.google.com/scholar?q=" +bibtex.data[i]['title'];
-						newTextNode = document.createTextNode("Search Google Scholar.");
-						newLink.appendChild(newTextNode);
-						tempListEntry.appendChild(newLink);
-					}
-					tempListEntry.id = bibtex.data[i]['cite'];
-					tempElement.appendChild(tempListEntry);
-					break;
-				}	
-			}
-		document.getElementById("bibTex").parentNode.insertBefore(tempElement, document.getElementById("references").nextSibling);
-		document.getElementById("bibTex").parentNode.removeChild(document.getElementById("bibTex"));
-		},
-	createPaper : function (medium) {		
-		var fullPageImg;
-		this.medium = medium;
-		this.currentContainer = 0;
-		this.initialize();
-		this.parseBibtex();
-		this.createColumn();
-		if(this.type === "chiextended" && this.medium === "print"){
-			fullPageImg = document.getElementById("fullPageImg");
-			document.body.removeChild(document.getElementById("fullPageImg"));
-			}
 		//replace cite entries:
 		var element = document.body.firstElementChild;
 		while(element){		
@@ -1757,15 +1808,15 @@ var paperLayout = {
 			while (element) {
 				if (element.className === "column") {
 					break;
-					}
+				}
 				element = element.nextElementSibling;
 				document.body.removeChild(element.previousElementSibling);
-				}
+			}
 			//SigChi Columns of the last page should be of approximately equal length:
 			if (this.type === "sigchi" || this.type === "chiextended") {
 				if (this.container.length % 2 !== 0) {
 					this.createColumn();
-					}
+				}
 				this.lastPageColumnHeight = (this.getElementHeight(this.container[this.container.length - 2]) + this.getElementHeight(this.container[this.container.length - 1])) / 2;
 				//get the content of the last two columns:
 				var tempContent = document.createElement("div");
@@ -1775,22 +1826,22 @@ var paperLayout = {
 				while (element) {
 					tempContent.appendChild(element.cloneNode(true));
 					element = element.nextElementSibling;
-					}
+				}
 				element = this.container[this.container.length - 1].firstElementChild;
 				while (element) {
 					tempContent.appendChild(element.cloneNode(true));
 					element = element.nextElementSibling;
-					}
+				}
 				//remove everything from the last two columns:
 				var y = 0;
 				while (y < this.container[this.container.length - 2].childElementCount) {
 					element = this.container[this.container.length - 2].firstElementChild;
 					this.container[this.container.length - 2].removeChild(element);
-					}
+				}
 				while (y < this.container[this.container.length - 1].childElementCount) {
 					element = this.container[this.container.length - 1].firstElementChild;
 					this.container[this.container.length - 1].removeChild(element);
-					}
+				}
 				//refill the last two columns:
 				element = tempContent.firstElementChild;
 				this.currentContainer = this.container.length - 2;
@@ -1799,10 +1850,10 @@ var paperLayout = {
 				//if there is only one element in the last two columns, it should be on the left side:
 				if (!this.getElementHeight(this.container[this.container.length - 2]) > 0) {
 					this.container[this.container.length - 2].appendChild(this.container[this.container.length - 1].firstElementChild);
-					}
-				document.body.removeChild(tempContent);
 				}
+				document.body.removeChild(tempContent);
 			}
+		}
 		this.createHeadlineCounter();
 		this.createListCounter();	
 		this.alignFootnotes();
@@ -1811,14 +1862,14 @@ var paperLayout = {
 			this.alignColumns();			
 			this.createPageBreaks();
 			this.alignFullPageImg(fullPageImg);			
-			}	
+		}	
 		else{
 			document.body.removeChild(document.getElementById("copyrightBox"));
 		}			
-		}
-	};
+	}
+};
 var run = function() {
 	paperLayout.createPaper("print");
 	//paperLayout.createPaper("screen");
-	};
+};
 window.addEventListener("load", run, true);
