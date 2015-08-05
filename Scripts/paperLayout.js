@@ -75,7 +75,8 @@
 		var element;
 		console.log("Type: " + this.type);
 		switch(this.type){
-			case "sigchi": 	elements = document.getElementsByClassName('abstract');
+			case "sigchi": 	
+			elements = document.getElementsByClassName('abstract');
 			element = elements[0];
 			break;
 			case "infovis": if(document.getElementsByClassName('diamondRule')[0]){
@@ -1828,7 +1829,8 @@
 					this.createColumn();
 					if(this.type === "chiextended" && this.medium === "print"){
 						fullPageImg = document.getElementById("fullPageImg");
-						document.body.removeChild(document.getElementById("fullPageImg"));
+						// document.body.removeChild(document.getElementById("fullPageImg"));
+						fullPageImg.parentNode.removeChild(fullPageImg);
 					}
 
 		// Replace cite entries:
@@ -1851,7 +1853,10 @@
 					break;
 				}
 				element = element.nextElementSibling;
-				document.body.removeChild(element.previousElementSibling);
+				if(element != null){
+					element.parentNode.removeChild(element);
+					//document.body.removeChild(element.previousElementSibling);
+				}
 			}
 
 			// SigChi Columns of the last page should be of approximately equal length:
