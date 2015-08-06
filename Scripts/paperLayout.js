@@ -1857,6 +1857,7 @@
 					element.parentNode.removeChild(element);
 					//document.body.removeChild(element.previousElementSibling);
 				}
+				document.body.removeChild(element.previousElementSibling);
 			}
 
 			// SigChi Columns of the last page should be of approximately equal length:
