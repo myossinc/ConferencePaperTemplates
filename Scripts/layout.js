@@ -243,6 +243,7 @@ var paperLayout = {
 			element = element.previousElementSibling;
 		}				
 		this.frontColumnHeightPX = this.columnHeightPX - predecessorHeightPX;
+		console.log("frontColumnHeightPX: " + this.frontColumnHeightPX);
 	},
 
 	calcTextlineHeight : function() {
@@ -252,6 +253,7 @@ var paperLayout = {
 		testLine.appendChild(newTextNode);
 		this.lineHeight = this.getElementHeight(testLine);
 		testLine.parentNode.removeChild(testLine);
+		console.log("calcTextlineHeight: " + this.lineHeight);
 	},
 
 	calcRemainingSpace : function(mode) {
@@ -260,9 +262,10 @@ var paperLayout = {
 			if (this.currentContainer === 0 && this.type === "chiextended") {
 				var childnumber = this.container[this.currentContainer].childElementCount;
 				remainingSpace = this.frontColumnHeightPX - this.copyrightBoxHeight;
+				console.log("childnumber: " + childnumber);
 				if(childnumber === 8){
 					remainingSpace = 0;
-					}					
+				}					
 			}	
 			else if (this.currentContainer === 0) {
 				remainingSpace = this.frontColumnHeightPX - this.copyrightBoxHeight - this.getElementHeight(this.container[this.currentContainer]);	
@@ -276,7 +279,7 @@ var paperLayout = {
 		}
 		else if (mode === "lastColumns"){
 			remainingSpace = this.lastPageColumnHeight - this.getElementHeight(this.container[this.currentContainer]);
-			}	
+			}
 		return remainingSpace;
 	},
 
@@ -1298,8 +1301,14 @@ var paperLayout = {
 			while (element) {
 				if (element.className === "column") {
 					break;
-					}
+				}
 				element = element.nextElementSibling;
+
+				while(element != null && element.firstChild){
+					console.log("removed");
+					element.removeChild(element.firstChild);
+				}
+				
 				if (element != null){
 					element.previousElementSibling.parentNode.removeChild(element.previousElementSibling);
 				}				
@@ -1549,8 +1558,8 @@ var paperLayout = {
 					tempElement = element.cloneNode(true);
 					tempCaption = element.nextElementSibling.cloneNode(true);	
 	
-						this.container[this.currentContainer].appendChild(tempElement);
-						this.container[this.currentContainer].appendChild(tempCaption);
+					this.container[this.currentContainer].appendChild(tempElement);
+					this.container[this.currentContainer].appendChild(tempCaption);
 											
 					element = element.nextElementSibling;
 					element = element.nextElementSibling;
@@ -1745,76 +1754,79 @@ var paperLayout = {
 		var tabCounter = 0;
 		var mathCounter = 0;
 		var footCounter = 0;
-
-		if (node.nodeName === "p"){			
-			nodeChild = node.firstElementChild;
-			while (nodeChild) {
-				nextNodeChild = nodeChild.nextElementSibling;				
-				if (nodeChild.nodeName === "cite") {																	
-					for (j = 0; j < this.documentCitationList.length; j++) {
+		var i = 1;
+		if (node.nodeName === "p"){
+				console.log("" + i + ". Cite gefunden");
+				i++;
+				nodeChild = node.firstElementChild;
+				while (nodeChild) {
+					nextNodeChild = nodeChild.nextElementSibling;				
+					if (nodeChild.nodeName === "cite") {																	
+						for (j = 0; j < this.documentCitationList.length; j++) {
+							
+							// Literature
+							if(nodeChild.firstChild.wholeText === this.documentCitationList[j]){							
+								link = document.createElement("a");
+								link.title = nodeChild.firstChild.wholeText;
+								link.href = "#"+nodeChild.firstChild.wholeText;	
+								link.id = "cite_ref"+nodeChild.firstChild.wholeText;
+								textnode = document.createTextNode("[" + [j+1] + "]"); 
+								link.appendChild(textnode);
+								node.replaceChild(link, nodeChild);			
+							}
+						}
 						
-						// Literature
-						if(nodeChild.firstChild.wholeText === this.documentCitationList[j]){							
+						// Pictures	
+						if(nodeChild.className === "figCite"){
+							figCounter++;
+
+							// Pictures, tables, math, footnote
 							link = document.createElement("a");
 							link.title = nodeChild.firstChild.wholeText;
-							link.href = "#"+nodeChild.firstChild.wholeText;	
-							link.id = "cite_ref"+nodeChild.firstChild.wholeText;
-							textnode = document.createTextNode("[" + [j+1] + "]"); 
+							link.href = "#"+nodeChild.firstChild.wholeText;							
+							textnode = document.createTextNode("Figure " + figCounter); 
 							link.appendChild(textnode);
-							node.replaceChild(link, nodeChild);			
-						}
-					}
-					
-					// Pictures	
-					if(nodeChild.className === "figCite"){
-						figCounter++;
+							node.replaceChild(link, nodeChild);										
+							}
 
-						// Pictures, tables, math, footnote
-						link = document.createElement("a");
-						link.title = nodeChild.firstChild.wholeText;
-						link.href = "#"+nodeChild.firstChild.wholeText;							
-						textnode = document.createTextNode("Figure " + figCounter); 
-						link.appendChild(textnode);
-						node.replaceChild(link, nodeChild);										
+						// Tables	
+						if(nodeChild.className === "tabCite"){
+							tabCounter++;
+							link = document.createElement("a");
+							link.title = nodeChild.firstChild.wholeText;
+							link.href = "#"+nodeChild.firstChild.wholeText;							
+							textnode = document.createTextNode("Table " + tabCounter); 
+							link.appendChild(textnode);
+							node.replaceChild(link, nodeChild);										
 						}
 
-					// Tables	
-					if(nodeChild.className === "tabCite"){
-						tabCounter++;
-						link = document.createElement("a");
-						link.title = nodeChild.firstChild.wholeText;
-						link.href = "#"+nodeChild.firstChild.wholeText;							
-						textnode = document.createTextNode("Table " + tabCounter); 
-						link.appendChild(textnode);
-						node.replaceChild(link, nodeChild);										
-					}
+						// Math	
+						if(nodeChild.className === "mathCite"){
+							mathCounter++;
+							link = document.createElement("a");
+							link.title = nodeChild.firstChild.wholeText;
+							link.href = "#"+nodeChild.firstChild.wholeText;							
+							textnode = document.createTextNode("Formula " + mathCounter); 
+							link.appendChild(textnode);
+							node.replaceChild(link, nodeChild);										
+						}
 
-					// Math	
-					if(nodeChild.className === "mathCite"){
-						mathCounter++;
-						link = document.createElement("a");
-						link.title = nodeChild.firstChild.wholeText;
-						link.href = "#"+nodeChild.firstChild.wholeText;							
-						textnode = document.createTextNode("Formula " + mathCounter); 
-						link.appendChild(textnode);
-						node.replaceChild(link, nodeChild);										
-					}
-
-					// Footnote
-					if(nodeChild.className === "footCite"){
-						footCounter++;
-						link = document.createElement("a");
-						link.title = nodeChild.firstChild.wholeText;
-						link.href = "#"+nodeChild.firstChild.wholeText;							
-						textnode = document.createTextNode(footCounter);
-						link.style.verticalAlign = "super"; 
-						link.style.fontSize = "6pt";
-						link.appendChild(textnode);
-						node.replaceChild(link, nodeChild);										
-					}											
-				}				
-				nodeChild = nextNodeChild;					
-			}			
+						// Footnote
+						if(nodeChild.className === "footCite"){
+							footCounter++;
+							link = document.createElement("a");
+							link.title = nodeChild.firstChild.wholeText;
+							link.href = "#"+nodeChild.firstChild.wholeText;							
+							textnode = document.createTextNode(footCounter);
+							link.style.verticalAlign = "super"; 
+							link.style.fontSize = "6pt";
+							link.appendChild(textnode);
+							node.replaceChild(link, nodeChild);										
+						}											
+					}				
+					nodeChild = nextNodeChild;					
+				}			
+			
 		}
 
 		else if (node.nodeName === "ol" || node.nodeName === "ul"){
